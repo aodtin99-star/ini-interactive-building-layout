@@ -88,3 +88,34 @@ public/plans/             เก็บภาพแปลนจริงในอ
 ไม่ใส่ตัวอย่างพิกัดห้องเพื่อป้องกันการเข้าใจผิดว่าเป็นแปลนจริง เพิ่มอาคารได้ด้วยการเพิ่ม object ใน `buildings` และรายการ `floors` โดยไม่ต้องแก้ส่วน Sidebar / Floor Selector / การ์ดอาคาร
 
 ข้อมูลภาพที่นำเข้าจาก UI เป็นภาพทดแทนชั่วคราวของชั้นนั้น ระบบจะไม่แสดงตำแหน่งพื้นที่จาก dataset ทับบนภาพที่นำเข้าชั่วคราว เพื่อป้องกันพิกัดไม่ตรงกัน การแสดงพื้นที่คลิกได้ใช้ภาพถาวรและข้อมูลตำแหน่งที่ยืนยันใน dataset เท่านั้น
+
+## Interactive Campus Map (ผ่าน Final QA)
+
+แผนที่มี 21 ป้ายคลิกได้: Building 12 จุด, Facility 6 จุด และ Area 3 จุด ทุกหน้ามี Back to Master Layout ข้อมูลยืนยัน CB/CSB/PB เดิมคงไว้ใน `src/data/buildings.ts` และใช้สำหรับ KPI 3 อาคาร / 11 ชั้นเท่านั้น; จำนวนชั้นที่แจ้งไว้ของปลายทางอื่นอยู่ใน `src/data/buildingCatalog.ts` ระบุรอยืนยันและไม่รวมใน KPI
+
+ตำแหน่งป้ายและรายการตรวจสอบอยู่ใน `CAMPUS-MAP-REVIEW.md` ปุ่มตรวจตำแหน่ง Hotspot จะแสดงหมายเลข 1–21 และรายชื่อใต้แผนที่ โดยไม่แก้ภาพต้นฉบับ
+
+### Automated Tests สำหรับผู้พัฒนา
+
+```bash
+npm test
+npx playwright install chromium
+npm run test:e2e
+```
+
+`test:e2e` สร้าง Standalone ล่าสุดก่อนทดสอบ แต่ไม่เริ่ม Server ทดสอบการคลิกทุกป้ายที่ Zoom 100%, 150%, 200%, Floor Selector, Back, การปรับขนาด, Keyboard, Tablet, การส่งคำขอเครือข่าย และภาพต้นฉบับ ใช้ `npm run test:all` เพื่อรัน Unit และ Browser Tests ต่อกัน
+
+หากมี Microsoft Edge อยู่แล้ว ให้กำหนด `INI_EDGE_EXECUTABLE` เป็น path ของ executable เพื่อเพิ่มชุด `edge-offline` ตัวอย่าง PowerShell บนเครื่องพัฒนา:
+
+```powershell
+$env:INI_EDGE_EXECUTABLE = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+npm.cmd run test:e2e
+```
+
+ปรับ path ตามการติดตั้งจริง สามารถกำหนด `INI_CHROMIUM_EXECUTABLE` เพื่อใช้ Chromium ที่ติดตั้งอยู่แทน browser ของ Playwright ได้ หาก Chromium ถูกนโยบายบล็อก file:// ชุด Chromium จะทดสอบ inline HTML แบบ offline และแนบข้อจำกัดไว้ ส่วนชุด Edge ต้องเปิด file:// ได้จริงจึงจะผ่าน ผู้ใช้ Standalone ไม่ต้องติดตั้ง Node.js, Git, Playwright หรือรันคำสั่งทดสอบเหล่านี้
+
+## Final QA และ KPI ที่ยืนยันแล้ว
+
+KPI นับเฉพาะ CB 4 ชั้น, CSB 4 ชั้น, PB 3 ชั้น (รวม 3 อาคาร / 11 ชั้น) จำนวนชั้นที่แจ้งไว้ของปลายทางอื่นยังรอยืนยันและไม่รวมในยอดสรุป แผนที่แยก Building / Facility / Area และคง Hotspot เดิมทั้ง 21 จุด รายงานข้อมูลยืนยัน/ข้อมูลที่ยังรอและผลการทดสอบอยู่ใน `FINAL-QA-REPORT.md` ผู้ใช้งานอนุมัติบันทึกลง `feature/ini-building-layout` แล้ว โดยไม่ Merge เข้า main
+
+การเตรียมและนำเข้าภาพ Floor Layout จริงของ CB/CSB/PB ดู `FLOOR-LAYOUT-IMPORT.md` ไฟล์ถาวรใน `src/assets/floor-layouts/` จะถูกฝังใน Standalone โดยไม่สร้างตำแหน่งห้องหรือเปลี่ยนสถานะการยืนยัน Layout

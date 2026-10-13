@@ -1358,3 +1358,528 @@ dialog::backdrop {
     min-width: 100%;
   }
 }
+
+/* Campus overview: original image and percentage hotspots share one transform. */
+.campus-panel {
+  background: white;
+  border: 1px solid #e0e6ef;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.campus-panel .panel-heading {
+  gap: 18px;
+}
+.campus-panel h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 5px;
+}
+.campus-panel .panel-heading p {
+  margin: 0;
+  font-size: 11px;
+  color: #8190a5;
+}
+.campus-viewport {
+  position: relative;
+  overflow: hidden;
+  background: #ecf1f6;
+  touch-action: none;
+  cursor: grab;
+  padding: 24px;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.campus-viewport:active {
+  cursor: grabbing;
+}
+.campus-image-frame {
+  position: relative;
+  width: 100%;
+  transform-origin: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.campus-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+.campus-hotspot {
+  position: absolute;
+  padding: 0;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1;
+  line-height: normal;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  touch-action: manipulation;
+}
+.campus-hotspot:hover,
+.campus-hotspot:focus {
+  border-color: #47b6ee;
+  background: #81cfff20;
+  box-shadow: 0 0 0 3px #eef9ffb0;
+  outline: none;
+  z-index: 3;
+}
+.campus-hotspot.future:hover,
+.campus-hotspot.future:focus {
+  border-color: #c39b48;
+  background: #e7c46920;
+}
+.show-hotspots .campus-hotspot.available {
+  border-color: #2c92c8;
+  background: #6dbcec20;
+}
+.show-hotspots .campus-hotspot.future {
+  border-color: #b99244;
+  background: #dec37d20;
+}
+.campus-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #122a47;
+  color: white;
+  padding: 9px 12px;
+  border-radius: 5px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  pointer-events: none;
+  box-shadow: 0 4px 15px #14233b25;
+}
+.campus-tooltip small {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: #bdcddd;
+  margin-top: 2px;
+}
+.campus-hotspot:hover .campus-tooltip,
+.campus-hotspot:focus .campus-tooltip {
+  display: block;
+}
+.campus-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e1e7ef;
+  padding: 14px 20px;
+  color: #8293aa;
+  font-size: 10px;
+  gap: 15px;
+}
+.campus-toolbar > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.campus-legend {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  background: #fafbfd;
+  border-top: 1px solid #edf0f5;
+  padding: 13px 20px;
+  color: #8595ab;
+  font-size: 9px;
+  flex-wrap: wrap;
+}
+.campus-legend > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #57758e;
+}
+.campus-load {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  color: #6d83a0;
+  font-size: 9px;
+  padding: 4px;
+}
+.bounds-active {
+  background: #e5f0f9;
+  border-color: #9bbbd9;
+}
+.campus-feedback {
+  margin: 0;
+  padding: 13px 20px;
+  border-top: 1px solid #e3e9f0;
+  font-size: 10px;
+  line-height: 1.8;
+  color: #657d99;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.campus-feedback svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.campus-feedback.error {
+  color: #ae4b4b;
+}
+.campus-missing {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 42px 20px;
+  cursor: default;
+}
+.campus-missing h3 {
+  font-size: 19px;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+.campus-missing p {
+  font-size: 11px;
+  color: #8192a7;
+  margin: 3px 0;
+  line-height: 1.8;
+}
+.campus-missing .button {
+  margin-top: 22px;
+}
+.back-to-campus {
+  margin: 0 0 20px;
+}
+.back-arrow {
+  transform: rotate(180deg);
+}
+@media (min-width: 1500px) {
+  .campus-viewport {
+    padding: 30px;
+  }
+}
+@media (max-width: 950px) {
+  .campus-panel .panel-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .campus-viewport {
+    padding: 16px;
+    min-height: 0;
+  }
+  .campus-toolbar {
+    flex-wrap: wrap;
+  }
+  .campus-toolbar > span {
+    font-size: 9px;
+  }
+  .campus-legend {
+    gap: 12px;
+  }
+  .campus-load {
+    margin-left: 0;
+  }
+}
+
+/* Every campus label is actionable; decorative layers never intercept clicks. */
+.campus-image {
+  pointer-events: none;
+}
+.campus-hotspot {
+  pointer-events: auto;
+}
+.campus-review-number {
+  position: absolute;
+  left: -12px;
+  top: -14px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #174d80;
+  color: white;
+  border: 2px solid white;
+  display: grid;
+  place-items: center;
+  font:
+    600 10px/1 "Inter",
+    sans-serif;
+  pointer-events: none;
+  box-shadow: 0 1px 5px #17365740;
+}
+.campus-hotspot.area .campus-review-number {
+  background: #117869;
+}
+.campus-hotspot.area:hover,
+.campus-hotspot.area:focus,
+.show-hotspots .campus-hotspot.area {
+  border-color: #147f6c;
+  background: #6ccfb91a;
+}
+.campus-review-directory {
+  border-top: 1px solid #e3e9f1;
+  padding: 20px;
+  background: #f8fafd;
+}
+.campus-review-directory > p {
+  font-size: 11px;
+  color: #7c8ea5;
+  margin: 0 0 15px;
+}
+.campus-review-directory ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.campus-review-directory li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  background: white;
+  border: 1px solid #e3eaf2;
+  border-radius: 5px;
+  font-size: 10px;
+}
+.campus-review-directory li > span {
+  flex-shrink: 0;
+  background: #ebf1f8;
+  color: #294f78;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+}
+.campus-review-directory strong {
+  font-weight: 500;
+}
+.campus-review-directory small {
+  margin-left: auto;
+  color: #9aabbd;
+  font-size: 8px;
+}
+.layout-pending-banner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #7e693a;
+  background: #fbf7ed;
+  border: 1px solid #eadebe;
+  padding: 15px 18px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.layout-pending-banner small {
+  color: #a59473;
+  margin-left: auto;
+  font-size: 10px;
+}
+.location-detail-card {
+  background: white;
+  border: 1px solid #e0e7ef;
+  border-radius: 9px;
+  padding: 32px;
+  max-width: 820px;
+}
+.location-detail-card h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 12px 0 8px;
+}
+.location-detail-card > p {
+  font-size: 12px;
+  color: #8798ac;
+  line-height: 1.9;
+}
+.location-detail-card dl {
+  margin: 28px 0;
+  font-size: 12px;
+}
+.location-detail-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf1f5;
+}
+.location-detail-card dt {
+  color: #8e9db0;
+}
+.location-detail-card dd {
+  margin: 0;
+  text-align: right;
+  color: #4f6785;
+}
+.location-detail-card .location-data-note {
+  font-size: 10px;
+}
+.sidebar nav {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #3c506c transparent;
+}
+.sidebar-bottom {
+  padding-top: 22px;
+  flex-shrink: 0;
+}
+.sidebar-label,
+.brand,
+.workspace-label,
+.sidebar > .nav-item {
+  flex-shrink: 0;
+}
+@media (max-width: 950px) {
+  .campus-review-directory ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .campus-review-directory small {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .sidebar nav {
+    max-height: 160px;
+    flex-wrap: wrap;
+  }
+  .building-nav {
+    width: calc(33.333% - 6px);
+  }
+  .campus-review-directory ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .location-detail-card {
+    padding: 23px;
+  }
+  .layout-pending-banner small {
+    margin-left: 0;
+  }
+}
+
+/* Final QA: highlights stay outside the printed labels and remain transparent. */
+.campus-hotspot:hover,
+.campus-hotspot:focus {
+  background: transparent !important;
+  border-color: #233f61;
+  box-shadow:
+    0 0 0 2px #ffffffeb,
+    0 4px 14px #10243c30;
+  outline: none;
+}
+.campus-hotspot.facility:hover,
+.campus-hotspot.facility:focus {
+  background: transparent !important;
+  border-color: #74879d;
+}
+.campus-hotspot.area:hover,
+.campus-hotspot.area:focus {
+  background: transparent !important;
+  border-color: #506b85;
+}
+.show-hotspots .campus-hotspot.available {
+  border-color: #233f61;
+  background: transparent;
+}
+.show-hotspots .campus-hotspot.facility {
+  border-color: #74879d;
+  background: transparent;
+}
+.show-hotspots .campus-hotspot.area {
+  border-color: #506b85;
+  background: transparent;
+}
+.campus-review-number {
+  background: #233f61;
+}
+.campus-hotspot.facility .campus-review-number {
+  background: #d6dee7;
+  color: #233f61;
+}
+.campus-hotspot.area .campus-review-number {
+  background: #506b85;
+  color: white;
+}
+.campus-tooltip {
+  border: 1px solid #dbe4ee;
+  background: #172d49;
+  color: #fff;
+  box-shadow: 0 6px 18px #142c4830;
+}
+.campus-tooltip small {
+  color: #c8d3df;
+}
+.location-type-badge {
+  display: inline-block;
+  padding: 4px 9px;
+  border: 1px solid #dce4ed;
+  border-radius: 4px;
+  background: #edf2f8;
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  color: #3d5774;
+  margin: 4px 0 6px;
+}
+.location-type-badge.facility {
+  background: #f3f5f7;
+  color: #65768a;
+}
+.location-type-badge.area {
+  background: #edf1f5;
+  color: #506b85;
+}
+.confirmed-data-note {
+  font-size: 10px;
+  color: #8595a8;
+  margin: 0 0 14px;
+  line-height: 1.9;
+}
+.campus-hover-caption {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.campus-pan-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.campus-tooltip-dock {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #172d49;
+  color: white;
+  border: 1px solid #d4dfeb;
+  padding: 7px 12px;
+  border-radius: 5px;
+  box-shadow: 0 3px 9px #172d4914;
+  pointer-events: none;
+}
+.campus-tooltip-dock strong {
+  font-size: 11px;
+  font-weight: 500;
+}
+.campus-tooltip-dock small {
+  font-size: 9px;
+  color: #cdd8e4;
+  border-left: 1px solid #718297;
+  padding-left: 12px;
+}

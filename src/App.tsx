@@ -11,17 +11,27 @@ import {
   Grid2X2,
   Info,
   Layers,
-  Map,
   Search,
   ShieldCheck,
   Upload,
   X,
 } from "lucide-react";
-import { buildings, floorKey, floorStatus, type Area } from "./data/buildings";
+import { floorKey, floorStatus, type Area } from "./data/buildings";
+import {
+  buildings,
+  confirmedBuildings,
+  confirmedFloors,
+  isFloorCountConfirmed,
+} from "./data/buildingCatalog";
+import { campusLabelById, campusTypeLabels } from "./data/campusMap";
+import LocationDetail from "./components/LocationDetail";
 import PlanViewer from "./components/PlanViewer";
+import { bundledFloorImages } from "./data/floorImages";
+import CampusMap from "./components/CampusMap";
 export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [floorNumber, setFloorNumber] = useState(1);
+  const [campusImage, setCampusImage] = useState<string>();
   const [images, setImages] = useState<Record<string, string>>({});
   const [importing, setImporting] = useState(false);
   const [help, setHelp] = useState(false);
@@ -33,16 +43,24 @@ export default function App() {
   const dialog = useRef<HTMLDialogElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const building = buildings.find((b) => b.id === selected);
+  const selectedLocation = campusLabelById(selected);
+  const detailOnly = selected !== null && !building;
   const floor = building?.floors.find((f) => f.number === floorNumber);
   const key = building && floor ? floorKey(building.id, floor.number) : "";
-  const image = images[key] ?? floor?.image;
-  const allFloors = buildings.flatMap((b) => b.floors);
+  const image = images[key] ?? floor?.image ?? bundledFloorImages[key];
+  const allFloors = confirmedFloors;
+  const detailPrefix =
+    selectedLocation?.kind === "facility" ? "Facility" : "อาคาร";
   const visibleAreas = images[key] ? [] : (floor?.areas ?? []);
-  const uploaded = buildings.reduce(
+  const uploaded = confirmedBuildings.reduce(
     (n, b) =>
       n +
-      b.floors.filter((f) => images[floorKey(b.id, f.number)] || f.image)
-        .length,
+      b.floors.filter(
+        (f) =>
+          images[floorKey(b.id, f.number)] ||
+          f.image ||
+          bundledFloorImages[floorKey(b.id, f.number)],
+      ).length,
     0,
   );
   const openBuilding = (id: string) => {
@@ -130,7 +148,7 @@ export default function App() {
           Master Layout
           <ChevronRight size={15} />
         </button>
-        <div className="sidebar-label">อาคาร / BUILDINGS</div>
+        <div className="sidebar-label">BUILDING / FACILITY</div>
         <nav aria-label="เลือกอาคาร">
           {buildings.map((b) => (
             <button
@@ -140,8 +158,12 @@ export default function App() {
             >
               <Building2 size={19} />
               <span>
-                อาคาร {b.id}
-                <small>{b.floors.length} ชั้น</small>
+                {b.title}
+                <small>
+                  {campusTypeLabels[campusLabelById(b.id)?.kind ?? "building"]}{" "}
+                  · {b.floors.length} ชั้น
+                  {!isFloorCountConfirmed(b.id) && " · รอยืนยัน"}
+                </small>
               </span>
               <ChevronRight size={15} />
             </button>
@@ -167,7 +189,13 @@ export default function App() {
           <div className="breadcrumb">
             Workspace
             <ChevronRight size={14} />
-            <span>{building ? `อาคาร ${building.id}` : "Master Layout"}</span>
+            <span>
+              {building
+                ? building.title
+                : selectedLocation
+                  ? selectedLocation.name
+                  : "Master Layout"}
+            </span>
           </div>
           <div className="header-actions">
             <span className="internal-badge">
@@ -185,13 +213,27 @@ export default function App() {
             <div>
               <div className="eyebrow">INI INTERACTIVE BUILDING LAYOUT</div>
               <h1>
-                {building ? `อาคาร ${building.id}` : "Master Layout"}
+                {building
+                  ? building.title
+                  : selectedLocation
+                    ? selectedLocation.name
+                    : "Master Layout"}
                 <span className="title-dot">.</span>
               </h1>
+              {selectedLocation && (
+                <span
+                  className={`location-type-badge ${selectedLocation.kind}`}
+                  data-testid="location-type"
+                >
+                  {campusTypeLabels[selectedLocation.kind]}
+                </span>
+              )}
               <p>
                 {building
                   ? "สำรวจแปลนรายชั้นและรายละเอียดพื้นที่ภายในอาคาร"
-                  : "ภาพรวมอาคารและสถานะข้อมูลพื้นที่ สถาบันนวัตกรรม ปตท."}
+                  : detailOnly
+                    ? "รายละเอียดพื้นที่บนแผนผังสถาบันนวัตกรรม ปตท."
+                    : "ภาพรวมอาคารและสถานะข้อมูลพื้นที่ สถาบันนวัตกรรม ปตท."}
               </p>
             </div>
             <button className="button secondary" onClick={() => setHelp(true)}>
@@ -202,9 +244,9 @@ export default function App() {
           <div className="stats-grid">
             <div className="stat">
               <div>
-                <span>อาคารทั้งหมด</span>
+                <span>อาคารที่ยืนยันแล้ว</span>
                 <strong>
-                  {String(buildings.length).padStart(2, "0")}
+                  {String(confirmedBuildings.length).padStart(2, "0")}
                   <small>อาคาร</small>
                 </strong>
               </div>
@@ -212,7 +254,7 @@ export default function App() {
             </div>
             <div className="stat">
               <div>
-                <span>ชั้นทั้งหมด</span>
+                <span>จำนวนชั้นที่ยืนยันแล้ว</span>
                 <strong>
                   {String(allFloors.length).padStart(2, "0")}
                   <small>ชั้น</small>
@@ -243,102 +285,22 @@ export default function App() {
               <FileImage />
             </div>
           </div>
-          {!building ? (
+          {detailOnly ? (
+            <LocationDetail
+              name={selectedLocation?.name ?? selected!}
+              kind={selectedLocation?.kind ?? "building"}
+              onBack={() => {
+                setSelected(null);
+                setArea(null);
+              }}
+            />
+          ) : !building ? (
             <>
-              <section className="section-heading">
-                <div>
-                  <h2>
-                    สำรวจอาคาร <span>BUILDING DIRECTORY</span>
-                  </h2>
-                  <p>เลือกอาคารเพื่อดูข้อมูลและแปลนแต่ละชั้น</p>
-                </div>
-                <span className="subtle">
-                  <Grid2X2 size={15} />
-                  {buildings.length} อาคาร
-                </span>
-              </section>
-              <div className="building-grid">
-                {buildings.map((b, index) => (
-                  <button
-                    className="building-card"
-                    key={b.id}
-                    onClick={() => openBuilding(b.id)}
-                  >
-                    <div className={`building-art art-${index}`}>
-                      <span className="card-index">
-                        0{index + 1} / BUILDING
-                      </span>
-                      <Building2 size={75} strokeWidth={0.85} />
-                      <span className="art-code">{b.id}</span>
-                      <div className="floor-badge">
-                        <Layers size={13} />
-                        {b.floors.length} FLOORS
-                      </div>
-                    </div>
-                    <div className="building-card-body">
-                      <div className="card-heading">
-                        <div>
-                          <h3>{b.title}</h3>
-                          <span>{b.subtitle}</span>
-                        </div>
-                        <div className="arrow-circle">
-                          <ArrowRight size={18} />
-                        </div>
-                      </div>
-                      <div className="card-divider" />
-                      <div className="card-status">
-                        <span
-                          className={`status ${b.floors.some((f) => f.status === "pending") ? "pending" : "confirmed"}`}
-                        >
-                          <span />
-                          {b.floors.every((f) => f.status === "confirmed")
-                            ? "ยืนยันข้อมูล Layout แล้ว"
-                            : b.floors.every((f) => f.status === "pending")
-                              ? "รอข้อมูล Layout"
-                              : "ยืนยันบางชั้น"}
-                        </span>
-                      </div>
-                      <p>
-                        {
-                          b.floors.filter((f) => f.status === "confirmed")
-                            .length
-                        }{" "}
-                        ชั้นยืนยันแล้ว ·{" "}
-                        {b.floors.filter((f) => f.status === "pending").length >
-                        0
-                          ? `${b.floors.filter((f) => f.status === "pending").length} ชั้นรอข้อมูล`
-                          : "รอภาพแปลนจริง"}
-                      </p>
-                      <div className="floor-mini">
-                        {b.floors.map((f) => (
-                          <span
-                            key={f.number}
-                            className={
-                              f.status === "pending" ? "pending-floor" : ""
-                            }
-                          >
-                            F{f.number}
-                            <span className="dot" />
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <div className="overview-note">
-                <div className="note-icon">
-                  <Map size={23} />
-                </div>
-                <div>
-                  <h3>ภาพรวมที่อ้างอิงข้อมูลจริง</h3>
-                  <p>
-                    การ์ดด้านบนเป็นรายการอาคาร ไม่ได้แสดงตำแหน่ง ขนาด
-                    หรือระยะห่างจริงของอาคาร
-                  </p>
-                </div>
-                <span className="outline-badge">NO SIMULATED LAYOUT</span>
-              </div>
+              <CampusMap
+                onSelect={openBuilding}
+                sessionImage={campusImage}
+                onImageSelected={setCampusImage}
+              />
               <section className="status-section">
                 <div className="section-heading">
                   <div>
@@ -347,6 +309,10 @@ export default function App() {
                   </div>
                   <span className="subtle">DATA READINESS</span>
                 </div>
+                <p className="confirmed-data-note">
+                  KPI นับเฉพาะ CB, CSB และ PB · อาคารและ Facility
+                  อื่นยังรอการยืนยันข้อมูลและไม่รวมในยอดสรุป
+                </p>
                 <div className="readiness-row">
                   <div>
                     <span className="legend-dot green" />
@@ -375,6 +341,25 @@ export default function App() {
           ) : (
             floor && (
               <>
+                <button
+                  className="button secondary back-to-campus"
+                  onClick={() => {
+                    setSelected(null);
+                    setArea(null);
+                  }}
+                >
+                  <ArrowRight size={16} className="back-arrow" />
+                  Back to Master Layout
+                </button>
+                {building.awaitingLayout && (
+                  <div className="layout-pending-banner">
+                    <Info size={17} />
+                    <span>อยู่ระหว่างจัดเตรียมข้อมูล Layout</span>
+                    <small>
+                      จำนวนชั้นที่แจ้งไว้ยังรอการยืนยัน · ยังไม่มีภาพแปลนจริง
+                    </small>
+                  </div>
+                )}
                 <div className="floor-section">
                   <div>
                     <h2>
@@ -420,7 +405,7 @@ export default function App() {
                   <section className="plan-panel">
                     <div className="panel-heading">
                       <h3>
-                        อาคาร {building.id} · ชั้น {floor.number}
+                        {detailPrefix} {building.id} · ชั้น {floor.number}
                       </h3>
                       <span
                         className={`status ${floor.status === "pending" && !image ? "pending" : "confirmed"}`}
@@ -461,7 +446,7 @@ export default function App() {
                             <Building2 size={27} />
                           </div>
                           <h3>
-                            อาคาร {building.id} · ชั้น {floor.number}
+                            {detailPrefix} {building.id} · ชั้น {floor.number}
                           </h3>
                           <p>ข้อมูลอาคารและสถานะแปลน</p>
                           <dl>
@@ -582,7 +567,13 @@ export default function App() {
               <h2>วิธีใช้งาน</h2>
               <p>สำรวจอาคารและแปลนพื้นที่ภายในสถาบัน</p>
               <ol>
-                <li>เลือกอาคาร CB, CSB หรือ PB จาก Sidebar หรือการ์ด</li>
+                <li>
+                  คลิกป้ายชื่ออาคารหรือพื้นที่บนแผนที่ หรือเลือกอาคารจาก Sidebar
+                </li>
+                <li>
+                  แผนที่ใช้ Tab / Enter เพื่อเปิดอาคาร ใช้ + / − เพื่อซูม
+                  ปุ่มลูกศรเพื่อเลื่อน และ 0 เพื่อรีเซ็ตเมื่อโฟกัสพื้นที่แผนที่
+                </li>
                 <li>เลือกชั้น และนำเข้าภาพแปลนจริงเมื่อพร้อม</li>
                 <li>
                   ใช้ปุ่ม + / − เพื่อซูม ลากภาพเพื่อเลื่อน และ Reset view
@@ -610,7 +601,7 @@ export default function App() {
               <span className="eyebrow">IMPORT FLOOR PLAN</span>
               <h2>นำเข้าภาพแปลนจริง</h2>
               <p>
-                อาคาร {building?.id} · ชั้น {floor?.number}
+                {detailPrefix} {building?.id} · ชั้น {floor?.number}
               </p>
               {floor?.status === "pending" && (
                 <div className="scope-notice">

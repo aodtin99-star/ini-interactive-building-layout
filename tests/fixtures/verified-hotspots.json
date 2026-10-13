@@ -1,0 +1,191 @@
+[
+  {
+    "id": "PB",
+    "bounds": {
+      "x": 239,
+      "y": 253,
+      "width": 62,
+      "height": 33
+    }
+  },
+  {
+    "id": "UB",
+    "bounds": {
+      "x": 37,
+      "y": 302,
+      "width": 65,
+      "height": 33
+    }
+  },
+  {
+    "id": "ALB",
+    "bounds": {
+      "x": 129,
+      "y": 304,
+      "width": 76,
+      "height": 33
+    }
+  },
+  {
+    "id": "CSB",
+    "bounds": {
+      "x": 274,
+      "y": 327,
+      "width": 70,
+      "height": 33
+    }
+  },
+  {
+    "id": "CB",
+    "bounds": {
+      "x": 414,
+      "y": 318,
+      "width": 60,
+      "height": 33
+    }
+  },
+  {
+    "id": "FLB",
+    "bounds": {
+      "x": 300,
+      "y": 397,
+      "width": 66,
+      "height": 33
+    }
+  },
+  {
+    "id": "TCB",
+    "bounds": {
+      "x": 633,
+      "y": 328,
+      "width": 62,
+      "height": 32
+    }
+  },
+  {
+    "id": "LSB",
+    "bounds": {
+      "x": 225,
+      "y": 543,
+      "width": 68,
+      "height": 34
+    }
+  },
+  {
+    "id": "EAL",
+    "bounds": {
+      "x": 979,
+      "y": 708,
+      "width": 62,
+      "height": 32
+    }
+  },
+  {
+    "id": "BPU",
+    "bounds": {
+      "x": 283,
+      "y": 756,
+      "width": 70,
+      "height": 31
+    }
+  },
+  {
+    "id": "FUES",
+    "bounds": {
+      "x": 164,
+      "y": 620,
+      "width": 73,
+      "height": 32
+    }
+  },
+  {
+    "id": "Chemical Blending",
+    "bounds": {
+      "x": 107,
+      "y": 499,
+      "width": 99,
+      "height": 50
+    }
+  },
+  {
+    "id": "Fuel Blending",
+    "bounds": {
+      "x": 188,
+      "y": 359,
+      "width": 65,
+      "height": 38
+    }
+  },
+  {
+    "id": "SUB 115 KV",
+    "bounds": {
+      "x": 37,
+      "y": 523,
+      "width": 55,
+      "height": 39
+    }
+  },
+  {
+    "id": "Gas Mixing",
+    "bounds": {
+      "x": 851,
+      "y": 704,
+      "width": 72,
+      "height": 43
+    }
+  },
+  {
+    "id": "Waste Storage",
+    "bounds": {
+      "x": 66,
+      "y": 147,
+      "width": 66,
+      "height": 40
+    }
+  },
+  {
+    "id": "Parking",
+    "bounds": {
+      "x": 384,
+      "y": 534,
+      "width": 87,
+      "height": 30
+    }
+  },
+  {
+    "id": "GH",
+    "bounds": {
+      "x": 1185,
+      "y": 544,
+      "width": 41,
+      "height": 26
+    }
+  },
+  {
+    "id": "POND 1",
+    "bounds": {
+      "x": 842,
+      "y": 448,
+      "width": 93,
+      "height": 30
+    }
+  },
+  {
+    "id": "POND 2",
+    "bounds": {
+      "x": 1096,
+      "y": 361,
+      "width": 95,
+      "height": 29
+    }
+  },
+  {
+    "id": "POND 3",
+    "bounds": {
+      "x": 1027,
+      "y": 187,
+      "width": 99,
+      "height": 30
+    }
+  }
+]
