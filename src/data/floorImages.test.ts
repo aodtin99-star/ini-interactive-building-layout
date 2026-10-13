@@ -35,7 +35,8 @@ describe("real floor image readiness", () => {
     expect(expectedFloorImageName("FLB", 1)).toBeUndefined();
   });
   it("does not invent any image or modify verified floor metadata", () => {
-    expect(bundledFloorImages).toEqual({});
+    expect(Object.keys(bundledFloorImages)).toEqual(["CB-1"]);
+    expect(bundledFloorImages["CB-1"]).toBeTruthy();
     for (const building of buildings)
       for (const floor of building.floors) {
         expect(floor.image).toBeUndefined();

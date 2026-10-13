@@ -61,3 +61,7 @@ node scripts/build-standalone.mjs
 การเตรียมและนำเข้าภาพ Floor Layout จริงของ CB/CSB/PB ดู `FLOOR-LAYOUT-IMPORT.md` ไฟล์ถาวรใน `src/assets/floor-layouts/` จะถูกฝังใน Standalone โดยไม่สร้างตำแหน่งห้องหรือเปลี่ยนสถานะการยืนยัน Layout
 
 เวอร์ชัน Phase 2 ใน Workspace ผ่าน Recovery Verification แล้ว เพิ่มหน้า Overview อาคารและเส้นทางกลับจาก CB ชั้น 1 แต่ยังรอภาพจริง `CB-1.png` ผู้ใช้ตรวจรับและอนุมัติให้ Commit/Push ไปยัง `feature/ini-building-layout` แล้ว ดูผลทดสอบและข้อจำกัดใน [PHASE-2-STATUS.md](PHASE-2-STATUS.md) ห้าม Merge เข้า main และหยุดรอภาพ CB ชั้น 1 ก่อนเริ่มงานถัดไป
+
+## อัปเดตภาพจริง CB ชั้น 1 (ตรวจรับแล้ว)
+
+Standalone ใน Workspace ล่าสุดฝัง `src/assets/floor-layouts/CB-1.png` แล้ว เปิด CB ชั้น 1 จะเห็นภาพจริงแทน Placeholder รายงานล่าสุด: [CB-1-INTEGRATION-QA.md](CB-1-INTEGRATION-QA.md) ผู้ใช้อนุมัติให้ Commit/Push งาน CB ชั้น 1 แล้ว ไม่มีการ Merge เข้า main และยังไม่ได้ทดสอบเครื่อง Windows ของบริษัทโดยตรง

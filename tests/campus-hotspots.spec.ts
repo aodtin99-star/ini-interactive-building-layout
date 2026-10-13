@@ -335,7 +335,7 @@ test("confirmed KPIs remain 3 buildings / 11 floors even after visiting unconfir
     await expect(cards.nth(1)).toContainText("จำนวนชั้นที่ยืนยันแล้ว");
     await expect(cards.nth(1).locator("strong")).toHaveText(/11\s*ชั้น/);
     await expect(cards.nth(2).locator("strong")).toHaveText(/09\s*ชั้น/);
-    await expect(cards.nth(3).locator("strong")).toHaveText(/00\s*\/ 11 ชั้น/);
+    await expect(cards.nth(3).locator("strong")).toHaveText(/01\s*\/ 11 ชั้น/);
   }
   await verifyKpis();
   for (const name of ["FLB", "Parking", "Gas Mixing", "POND 1"]) {
@@ -391,7 +391,7 @@ test("local floor image import works offline and adds no room hotspots or verifi
   ).toHaveText(/03\s*\/ 11 ชั้น/);
 });
 
-test("phase 2 CB floor 1 prototype supports floor tools and both return paths without a fabricated image", async ({
+test("phase 2 CB floor 1 real image supports floor tools and both return paths without room hotspots", async ({
   page,
 }) => {
   await openOffline(page);
@@ -402,14 +402,11 @@ test("phase 2 CB floor 1 prototype supports floor tools and both return paths wi
   await expect(
     page.getByRole("navigation", { name: "เส้นทาง Floor Layout" }),
   ).toContainText("Master Layout");
-  await expect(page.locator(".floor-integration-notice")).toContainText(
-    "CB-1.png",
-  );
-  await expect(page.locator(".plan-image img")).toHaveCount(0);
+  await expect(page.locator(".plan-image img")).toBeVisible();
+  await expect(page.locator(".floor-integration-notice")).toHaveCount(0);
+  await expect(page.locator(".plan-image img")).toHaveAttribute("alt", "Floor Layout CB ชั้น 1");
   await expect(page.locator(".area-hotspot")).toHaveCount(0);
-  await expect(page.locator(".canvas-placeholder")).toContainText(
-    "ไม่มีการจำลองแปลนหรือตำแหน่งห้อง",
-  );
+  await expect(page.locator(".canvas-placeholder")).toHaveCount(0);
   await page.getByRole("button", { name: "ขยาย", exact: true }).click();
   await expect(page.locator(".plan-panel output")).toHaveText("110%");
   const canvas = page.locator(".plan-canvas");
@@ -419,13 +416,13 @@ test("phase 2 CB floor 1 prototype supports floor tools and both return paths wi
   await page.mouse.down();
   await page.mouse.move(rect!.x + 65, rect!.y + 120, { steps: 4 });
   await page.mouse.up();
-  await expect(page.locator(".canvas-placeholder")).toHaveAttribute(
+  await expect(page.locator(".plan-image")).toHaveAttribute(
     "style",
     /translate\(40px,\s*30px\)/,
   );
   await page.getByRole("button", { name: "Reset view", exact: true }).click();
   await expect(page.locator(".plan-panel output")).toHaveText("100%");
-  await expect(page.locator(".canvas-placeholder")).toHaveAttribute(
+  await expect(page.locator(".plan-image")).toHaveAttribute(
     "style",
     /translate\(0px,\s*0px\)/,
   );
@@ -439,9 +436,8 @@ test("phase 2 CB floor 1 prototype supports floor tools and both return paths wi
   await page
     .getByRole("button", { name: "เปิด Floor Layout CB ชั้น 1", exact: true })
     .click();
-  await expect(page.locator(".floor-integration-notice")).toContainText(
-    "CB-1.png",
-  );
+  await expect(page.locator(".plan-image img")).toBeVisible();
+  await expect(page.locator(".floor-integration-notice")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Back to Master Layout", exact: true })
     .click();
@@ -516,7 +512,7 @@ test("phase 2 CB floor 1 tablet display and overview navigation remain responsiv
   await cb.focus();
   await cb.scrollIntoViewIfNeeded();
   await cb.tap();
-  await expect(page.locator(".expected-floor-file")).toHaveText("CB-1.png");
+  await expect(page.locator(".plan-image img")).toHaveAttribute("alt", "Floor Layout CB ชั้น 1");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
