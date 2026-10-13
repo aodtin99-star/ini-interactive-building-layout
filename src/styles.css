@@ -1883,3 +1883,188 @@ dialog::backdrop {
   border-left: 1px solid #718297;
   padding-left: 12px;
 }
+
+/* Phase 2: real floor image integration, without simulated plan geometry. */
+.floor-page-navigation {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.floor-page-navigation .back-to-campus {
+  margin: 0;
+}
+.floor-route {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #91a0b3;
+  font-size: 10px;
+  margin-bottom: 22px;
+}
+.floor-route strong {
+  font-weight: 500;
+  color: #526a88;
+}
+.floor-integration-notice {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 17px 20px;
+  background: #eef3f8;
+  border: 1px solid #dbe4ef;
+  border-radius: 7px;
+  margin-bottom: 18px;
+  color: #738ba6;
+}
+.floor-integration-notice > svg {
+  flex-shrink: 0;
+}
+.floor-integration-notice h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #486482;
+  margin: 5px 0;
+}
+.floor-integration-notice p {
+  font-size: 10px;
+  line-height: 1.9;
+  color: #8696ac;
+  margin: 0;
+}
+.floor-integration-notice p strong {
+  font-weight: 600;
+  color: #547292;
+}
+.expected-floor-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d5dfeb;
+  background: #edf2f8;
+  color: #6a819e;
+  font-size: 9px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-top: 14px;
+}
+.building-overview-heading {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  border: 1px solid #e0e7ef;
+  background: white;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 22px;
+}
+.building-overview-heading .detail-symbol {
+  margin: 0;
+}
+.building-overview-heading h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 7px 0;
+}
+.building-overview-heading p {
+  font-size: 11px;
+  color: #8798ad;
+  margin: 0;
+}
+.floor-overview-intro {
+  font-size: 11px;
+  color: #8a9aae;
+  line-height: 1.9;
+  margin: 0 0 17px;
+}
+.floor-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.floor-overview-card {
+  background: white;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  text-align: left;
+  padding: 22px;
+  color: #607c9b;
+}
+.floor-overview-card:hover {
+  border-color: #9bb2cb;
+  box-shadow: 0 5px 18px #203a5610;
+  transform: translateY(-2px);
+}
+.floor-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #8094ad;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.floor-card-top svg:last-child {
+  margin-left: auto;
+}
+.floor-overview-card h3 {
+  font-size: 19px;
+  font-weight: 500;
+  color: #314d70;
+  margin: 23px 0 14px;
+}
+.floor-overview-card p {
+  font-size: 10px;
+  color: #8d9db1;
+  margin: 14px 0;
+}
+.floor-overview-card > small {
+  font-size: 9px;
+  line-height: 1.8;
+  color: #8c9cb0;
+  display: block;
+  margin-bottom: 15px;
+}
+.floor-card-file {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid #e9edf3;
+  padding-top: 14px;
+  color: #91a2b7;
+  font-size: 9px;
+}
+@media (max-width: 1180px) {
+  .floor-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .floor-integration-notice {
+    padding: 15px;
+  }
+  .floor-page-navigation .button {
+    font-size: 10px;
+  }
+  .building-overview-heading {
+    padding: 19px;
+  }
+  .building-overview-heading h2 {
+    font-size: 19px;
+  }
+  .floor-overview-card {
+    padding: 17px;
+  }
+  .floor-overview-card .status {
+    font-size: 7px;
+  }
+  .floor-overview-intro {
+    font-size: 10px;
+  }
+}
+.plan-image img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Minus,
@@ -14,15 +14,37 @@ export default function PlanViewer({
   image,
   onArea,
   onImport,
+  buildingId,
+  expectedFile,
 }: {
   floor: Floor;
   image?: string;
   onArea: (area: Area) => void;
   onImport: () => void;
+  buildingId?: string;
+  expectedFile?: string;
 }) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [failed, setFailed] = useState(false);
+  const viewport = useRef<HTMLDivElement>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 800, height: 430 });
+  const [imageSize, setImageSize] = useState({ width: 1, height: 1 });
+  useEffect(() => {
+    const node = viewport.current;
+    if (!node) return;
+    const measure = () =>
+      setViewportSize({ width: node.clientWidth, height: node.clientHeight });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  const aspect = imageSize.width / imageSize.height;
+  const fitWidth = Math.min(
+    viewportSize.width * 0.9,
+    viewportSize.height * 0.8 * aspect,
+  );
   const drag = useRef<{
     x: number;
     y: number;
@@ -38,6 +60,7 @@ export default function PlanViewer({
     <div className="viewer-shell">
       <div
         className="plan-canvas"
+        ref={viewport}
         onPointerDown={(e) => {
           if (e.button !== 0 || (e.target as HTMLElement).closest("button"))
             return;
@@ -78,13 +101,21 @@ export default function PlanViewer({
           <div
             className="plan-image"
             style={{
+              width: fitWidth,
+              height: fitWidth / aspect,
               transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})`,
             }}
           >
             <img
               src={image}
-              alt={`ภาพแปลนจริง ชั้น ${floor.number}`}
+              alt={`Floor Layout ${buildingId ?? "อาคาร"} ชั้น ${floor.number}`}
               draggable={false}
+              onLoad={(event) =>
+                setImageSize({
+                  width: event.currentTarget.naturalWidth,
+                  height: event.currentTarget.naturalHeight,
+                })
+              }
               onError={() => setFailed(true)}
             />
             {floor.areas.map((area) => (
@@ -132,6 +163,12 @@ export default function PlanViewer({
                 : "ข้อมูลชั้นได้รับการยืนยันแล้ว · ยังไม่ได้อัปโหลดภาพ"}
             </p>
             <p className="placeholder-note">ไม่มีการจำลองแปลนหรือตำแหน่งห้อง</p>
+            {expectedFile && (
+              <span className="expected-floor-file">
+                <Image size={13} />
+                {expectedFile}
+              </span>
+            )}
             <button className="button secondary" onClick={onImport}>
               <Upload size={16} />
               นำเข้าภาพแปลน

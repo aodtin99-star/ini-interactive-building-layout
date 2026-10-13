@@ -26,11 +26,13 @@ import {
 import { campusLabelById, campusTypeLabels } from "./data/campusMap";
 import LocationDetail from "./components/LocationDetail";
 import PlanViewer from "./components/PlanViewer";
-import { bundledFloorImages } from "./data/floorImages";
+import { bundledFloorImages, expectedFloorImageName } from "./data/floorImages";
+import BuildingOverview from "./components/BuildingOverview";
 import CampusMap from "./components/CampusMap";
 export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [floorNumber, setFloorNumber] = useState(1);
+  const [buildingOverview, setBuildingOverview] = useState(false);
   const [campusImage, setCampusImage] = useState<string>();
   const [images, setImages] = useState<Record<string, string>>({});
   const [importing, setImporting] = useState(false);
@@ -66,6 +68,7 @@ export default function App() {
   const openBuilding = (id: string) => {
     setSelected(id);
     setFloorNumber(1);
+    setBuildingOverview(false);
     setArea(null);
     setQuery("");
   };
@@ -338,19 +341,60 @@ export default function App() {
                 </div>
               </section>
             </>
+          ) : buildingOverview ? (
+            <BuildingOverview
+              building={building}
+              readyFloors={building.floors
+                .filter(
+                  (f) =>
+                    images[floorKey(building.id, f.number)] ||
+                    f.image ||
+                    bundledFloorImages[floorKey(building.id, f.number)],
+                )
+                .map((f) => f.number)}
+              onMaster={() => {
+                setSelected(null);
+                setArea(null);
+              }}
+              onFloor={(number) => {
+                setFloorNumber(number);
+                setBuildingOverview(false);
+                setArea(null);
+                setQuery("");
+              }}
+            />
           ) : (
             floor && (
               <>
-                <button
-                  className="button secondary back-to-campus"
-                  onClick={() => {
-                    setSelected(null);
-                    setArea(null);
-                  }}
-                >
-                  <ArrowRight size={16} className="back-arrow" />
-                  Back to Master Layout
-                </button>
+                <div className="floor-page-navigation">
+                  <button
+                    className="button secondary"
+                    onClick={() => {
+                      setBuildingOverview(true);
+                      setArea(null);
+                    }}
+                  >
+                    <ArrowRight size={16} className="back-arrow" />
+                    กลับไปหน้าอาคาร {building.id}
+                  </button>
+                  <button
+                    className="button secondary back-to-campus"
+                    onClick={() => {
+                      setSelected(null);
+                      setArea(null);
+                    }}
+                  >
+                    <ArrowRight size={16} className="back-arrow" />
+                    Back to Master Layout
+                  </button>
+                </div>
+                <nav className="floor-route" aria-label="เส้นทาง Floor Layout">
+                  <span>Master Layout</span>
+                  <ChevronRight size={13} />
+                  <span>{building.id}</span>
+                  <ChevronRight size={13} />
+                  <strong>ชั้น {floor.number}</strong>
+                </nav>
                 {building.awaitingLayout && (
                   <div className="layout-pending-banner">
                     <Info size={17} />
@@ -401,6 +445,30 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                {!image &&
+                  expectedFloorImageName(building.id, floor.number) && (
+                    <div className="floor-integration-notice">
+                      <FileImage size={22} />
+                      <div>
+                        <span className="eyebrow">
+                          {building.id === "CB" && floor.number === 1
+                            ? "PHASE 2 · CB FLOOR 01 PILOT"
+                            : "FLOOR LAYOUT PENDING"}
+                        </span>
+                        <h3>
+                          รอภาพ Floor Layout จริง · {building.id} ชั้น{" "}
+                          {floor.number}
+                        </h3>
+                        <p>
+                          ไฟล์ที่ต้องรับ:{" "}
+                          <strong>
+                            {expectedFloorImageName(building.id, floor.number)}
+                          </strong>{" "}
+                          หรือ JPG / JPEG / WebP · ไม่มีตำแหน่งห้องสมมติ
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 <div className="layout-grid">
                   <section className="plan-panel">
                     <div className="panel-heading">
@@ -418,6 +486,11 @@ export default function App() {
                       key={`${key}-${image ?? ""}`}
                       floor={{ ...floor, areas: visibleAreas }}
                       image={image}
+                      buildingId={building.id}
+                      expectedFile={expectedFloorImageName(
+                        building.id,
+                        floor.number,
+                      )}
                       onArea={setArea}
                       onImport={openImport}
                     />

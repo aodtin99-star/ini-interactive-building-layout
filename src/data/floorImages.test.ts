@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { floorAssetKey, bundledFloorImages } from "./floorImages";
+import {
+  floorAssetKey,
+  bundledFloorImages,
+  expectedFloorImageName,
+} from "./floorImages";
 import { buildings } from "./buildings";
 describe("real floor image readiness", () => {
   it("accepts only existing CB/CSB/PB floor targets", () => {
@@ -22,6 +26,13 @@ describe("real floor image readiness", () => {
       expect(
         floorAssetKey(`/src/assets/floor-layouts/${path}`),
       ).toBeUndefined();
+  });
+  it("derives required filenames from confirmed floor records, without inventing missing floors", () => {
+    expect(expectedFloorImageName("CB", 1)).toBe("CB-1.png");
+    expect(expectedFloorImageName("CSB", 4)).toBe("CSB-4.png");
+    expect(expectedFloorImageName("PB", 3)).toBe("PB-3.png");
+    expect(expectedFloorImageName("PB", 4)).toBeUndefined();
+    expect(expectedFloorImageName("FLB", 1)).toBeUndefined();
   });
   it("does not invent any image or modify verified floor metadata", () => {
     expect(bundledFloorImages).toEqual({});

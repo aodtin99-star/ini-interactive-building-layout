@@ -368,13 +368,11 @@ test("local floor image import works offline and adds no room hotspots or verifi
       ).toBeDisabled();
       await page.getByRole("checkbox").check();
     }
-    await page
-      .locator("input[type=file]")
-      .setInputFiles({
-        name: "qa-image-decode-only.png",
-        mimeType: "image/png",
-        buffer: sample,
-      });
+    await page.locator("input[type=file]").setInputFiles({
+      name: "qa-image-decode-only.png",
+      mimeType: "image/png",
+      buffer: sample,
+    });
     await expect(page.locator(".plan-image img")).toBeVisible();
     await expect(page.locator(".plan-image img")).toHaveAttribute(
       "src",
@@ -391,4 +389,151 @@ test("local floor image import works offline and adds no room hotspots or verifi
   await expect(
     page.locator(".stats-grid .stat").nth(3).locator("strong"),
   ).toHaveText(/03\s*\/ 11 ชั้น/);
+});
+
+test("phase 2 CB floor 1 prototype supports floor tools and both return paths without a fabricated image", async ({
+  page,
+}) => {
+  await openOffline(page);
+  await page.locator('[data-building="CB"]').click();
+  await expect(
+    page.getByRole("tab", { name: "ชั้น 1", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await expect(
+    page.getByRole("navigation", { name: "เส้นทาง Floor Layout" }),
+  ).toContainText("Master Layout");
+  await expect(page.locator(".floor-integration-notice")).toContainText(
+    "CB-1.png",
+  );
+  await expect(page.locator(".plan-image img")).toHaveCount(0);
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  await expect(page.locator(".canvas-placeholder")).toContainText(
+    "ไม่มีการจำลองแปลนหรือตำแหน่งห้อง",
+  );
+  await page.getByRole("button", { name: "ขยาย", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("110%");
+  const canvas = page.locator(".plan-canvas");
+  await canvas.scrollIntoViewIfNeeded();
+  const rect = await canvas.boundingBox();
+  await page.mouse.move(rect!.x + 25, rect!.y + 90);
+  await page.mouse.down();
+  await page.mouse.move(rect!.x + 65, rect!.y + 120, { steps: 4 });
+  await page.mouse.up();
+  await expect(page.locator(".canvas-placeholder")).toHaveAttribute(
+    "style",
+    /translate\(40px,\s*30px\)/,
+  );
+  await page.getByRole("button", { name: "Reset view", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("100%");
+  await expect(page.locator(".canvas-placeholder")).toHaveAttribute(
+    "style",
+    /translate\(0px,\s*0px\)/,
+  );
+  await page
+    .getByRole("button", { name: "กลับไปหน้าอาคาร CB", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "ภาพรวม อาคาร CB", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".floor-overview-card")).toHaveCount(4);
+  await page
+    .getByRole("button", { name: "เปิด Floor Layout CB ชั้น 1", exact: true })
+    .click();
+  await expect(page.locator(".floor-integration-notice")).toContainText(
+    "CB-1.png",
+  );
+  await page
+    .getByRole("button", { name: "Back to Master Layout", exact: true })
+    .click();
+  await expect(page.locator(".campus-hotspot")).toHaveCount(21);
+});
+test("phase 2 CB floor 1 local image keeps its original dimensions and survives the building overview route", async ({
+  page,
+}) => {
+  await openOffline(page);
+  await page.locator('[data-building="CB"]').click();
+  await page
+    .getByRole("button", { name: "นำเข้าภาพแปลน", exact: true })
+    .first()
+    .click();
+  await page.locator("input[type=file]").setInputFiles({
+    name: "qa-image-decoding-only.png",
+    mimeType: "image/png",
+    buffer: readFileSync("src/assets/campus-original.png"),
+  }); // Test fixture only; not a supplied floor plan.
+  await expect(page.locator(".plan-image img")).toBeVisible();
+  expect(
+    await page
+      .locator(".plan-image img")
+      .evaluate((image) => [
+        (image as HTMLImageElement).naturalWidth,
+        (image as HTMLImageElement).naturalHeight,
+      ]),
+  ).toEqual([1672, 941]);
+  for (const width of [1600, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect
+      .poll(async () => {
+        const rect = await page.locator(".plan-image img").boundingBox();
+        return rect ? Math.abs(rect.width / rect.height - 1672 / 941) : 1;
+      })
+      .toBeLessThan(0.005);
+    const imageRect = await page.locator(".plan-image img").boundingBox();
+    const frameRect = await page.locator(".plan-image").boundingBox();
+    expect(Math.abs(imageRect!.width - frameRect!.width)).toBeLessThan(1);
+    expect(Math.abs(imageRect!.height - frameRect!.height)).toBeLessThan(1);
+  }
+  const src = await page.locator(".plan-image img").getAttribute("src");
+  await page
+    .getByRole("button", { name: "กลับไปหน้าอาคาร CB", exact: true })
+    .click();
+  await expect(page.locator(".floor-overview-card").first()).toContainText(
+    "มีภาพแปลนแล้ว",
+  );
+  await page
+    .getByRole("button", { name: "เปิด Floor Layout CB ชั้น 1", exact: true })
+    .click();
+  await expect(page.locator(".plan-image img")).toHaveAttribute("src", src!);
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Back to Master Layout", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Master Layout.", exact: true }),
+  ).toBeVisible();
+});
+test("phase 2 CB floor 1 tablet display and overview navigation remain responsive", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    offline: true,
+    hasTouch: true,
+    viewport: { width: 1024, height: 768 },
+  });
+  const page = await context.newPage();
+  await openOffline(page);
+  const cb = page.locator('[data-building="CB"]');
+  await cb.focus();
+  await cb.scrollIntoViewIfNeeded();
+  await cb.tap();
+  await expect(page.locator(".expected-floor-file")).toHaveText("CB-1.png");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page
+    .getByRole("button", { name: "กลับไปหน้าอาคาร CB", exact: true })
+    .tap();
+  await expect(page.locator(".floor-overview-card")).toHaveCount(4);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page
+    .getByRole("button", { name: "เปิด Floor Layout CB ชั้น 1", exact: true })
+    .tap();
+  await expect(page.locator(".plan-panel")).toBeVisible();
+  await context.close();
 });
