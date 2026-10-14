@@ -26,7 +26,7 @@ import {
 import { campusLabelById, campusTypeLabels } from "./data/campusMap";
 import LocationDetail from "./components/LocationDetail";
 import PlanViewer from "./components/PlanViewer";
-import { bundledFloorImages, expectedFloorImageName } from "./data/floorImages";
+import { activeFloorRevisions, bundledFloorImages, expectedFloorImageName } from "./data/floorImages";
 import BuildingOverview from "./components/BuildingOverview";
 import CampusMap from "./components/CampusMap";
 export default function App() {
@@ -445,6 +445,17 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                {building.id === "PB" && floor.number === 2 && image &&
+                  activeFloorRevisions[key] && !images[key] && (
+                    <div className="floor-integration-notice" role="status">
+                      <FileImage size={22} />
+                      <div>
+                        <span className="eyebrow">PTT Innovation Institute</span>
+                        <h3>อาคาร PB — ชั้น 2</h3>
+                        <p>ภาพแปลนฉบับปรับปรุงยืนยันแล้ว · PB-2-v2.png</p>
+                      </div>
+                    </div>
+                  )}
                 {!image &&
                   expectedFloorImageName(building.id, floor.number) && (
                     <div className="floor-integration-notice">

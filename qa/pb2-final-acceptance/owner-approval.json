@@ -1,0 +1,22 @@
+{
+  "buildingId": "PB",
+  "floor": 2,
+  "revision": "v2",
+  "status": "Owner Approved",
+  "approvedDate": "2026-10-14",
+  "evidence": "Owner Confirmation — PB Floor 2 Revision v2 ในข้อความผู้ใช้",
+  "approvedScope": [
+    "ตัด METAL SHEET ด้านซ้ายโดยตั้งใจ",
+    "ตัดพื้นที่ส่วนเกินขอบบนโดยตั้งใจ",
+    "ตัดพื้นที่ส่วนเกินขอบขวาโดยตั้งใจ"
+  ],
+  "conclusion": "การตัดตามขอบเขตที่เจ้าของแบบยืนยันไม่ใช่ข้อบกพร่องหรือข้อมูลสูญหาย",
+  "imageSha256": "76bb54b3ab7e28ff7c79301672fea28c33aaaf5637b21ccb8a7276be12825d3d",
+  "interactiveTests": {
+    "passed": 6,
+    "total": 6,
+    "retainedFromPreviousRun": true
+  },
+  "companyWindowsEdge": "ยังไม่ได้ทดสอบ",
+  "doesNotChangeFloorCountOrLegacyLayoutMetadata": true
+}

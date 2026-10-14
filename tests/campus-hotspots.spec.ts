@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+const digest = (data: Uint8Array) => createHash("sha256").update(data).digest("hex");
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { campusLabels } from "../src/data/campusMap";
@@ -335,7 +337,7 @@ test("confirmed KPIs remain 3 buildings / 11 floors even after visiting unconfir
     await expect(cards.nth(1)).toContainText("จำนวนชั้นที่ยืนยันแล้ว");
     await expect(cards.nth(1).locator("strong")).toHaveText(/11\s*ชั้น/);
     await expect(cards.nth(2).locator("strong")).toHaveText(/09\s*ชั้น/);
-    await expect(cards.nth(3).locator("strong")).toHaveText(/01\s*\/ 11 ชั้น/);
+    await expect(cards.nth(3).locator("strong")).toHaveText(/11\s*\/ 11 ชั้น/);
   }
   await verifyKpis();
   for (const name of ["FLB", "Parking", "Gas Mixing", "POND 1"]) {
@@ -388,7 +390,7 @@ test("local floor image import works offline and adds no room hotspots or verifi
   ).toHaveText(/09\s*ชั้น/);
   await expect(
     page.locator(".stats-grid .stat").nth(3).locator("strong"),
-  ).toHaveText(/03\s*\/ 11 ชั้น/);
+  ).toHaveText(/11\s*\/ 11 ชั้น/);
 });
 
 test("phase 2 CB floor 1 real image supports floor tools and both return paths without room hotspots", async ({
@@ -489,7 +491,7 @@ test("phase 2 CB floor 1 local image keeps its original dimensions and survives 
   await page
     .getByRole("button", { name: "เปิด Floor Layout CB ชั้น 1", exact: true })
     .click();
-  await expect(page.locator(".plan-image img")).toHaveAttribute("src", src!);
+  expect((await page.locator(".plan-image img").getAttribute("src")) === src).toBe(true);
   await expect(page.locator(".area-hotspot")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Back to Master Layout", exact: true })
@@ -532,4 +534,231 @@ test("phase 2 CB floor 1 tablet display and overview navigation remain responsiv
     .tap();
   await expect(page.locator(".plan-panel")).toBeVisible();
   await context.close();
+});
+
+
+for (const floorNumber of [2, 3, 4]) {
+test(`CB floor ${floorNumber} embeds the exact supplied image, preserves aspect and supports return routes`, async ({ page }) => {
+  await openOffline(page);
+  await page.locator('[data-building="CB"]').click();
+  await page.getByRole("tab", { name: `ชั้น ${floorNumber}`, exact: true }).click();
+  const image = page.locator(".plan-image img");
+  await expect(image).toHaveAttribute("alt", `Floor Layout CB ชั้น ${floorNumber}`);
+  await expect(image).toBeVisible();
+  const src = await image.getAttribute("src");
+  expect(digest(Buffer.from(src!.split(",")[1], "base64"))).toBe(digest(readFileSync(`src/assets/floor-layouts/CB-${floorNumber}.png`)));
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  for (const width of [1600, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect.poll(async () => {
+      const r = await image.boundingBox();
+      return r ? Math.abs(r.width / r.height - 1672 / 941) : 1;
+    }).toBeLessThan(0.005);
+  }
+  for (const zoom of [150, 200]) {
+    for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "ขยาย", exact: true }).click();
+    await expect(page.locator(".plan-panel output")).toHaveText(`${zoom}%`);
+  }
+  const canvas = page.locator(".plan-canvas");
+  await canvas.scrollIntoViewIfNeeded();
+  const r = (await canvas.boundingBox())!;
+  await page.mouse.move(r.x + 25, r.y + 90);
+  await page.mouse.down();
+  await page.mouse.move(r.x + 65, r.y + 120, { steps: 4 });
+  await page.mouse.up();
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(40px,\s*30px\)/);
+  await page.getByRole("button", { name: "Reset view", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("100%");
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(0px,\s*0px\)/);
+  await page.getByRole("button", { name: "กลับไปหน้าอาคาร CB", exact: true }).click();
+  await expect(page.locator(".floor-overview-card").nth(floorNumber - 1)).toContainText("มีภาพแปลนแล้ว");
+  await page.getByRole("button", { name: `เปิด Floor Layout CB ชั้น ${floorNumber}`, exact: true }).click();
+  expect((await image.getAttribute("src")) === src).toBe(true);
+  for (const number of [1, 2, 3, 4, 3, 2, 1]) {
+    await page.getByRole("tab", { name: `ชั้น ${number}`, exact: true }).click();
+    await expect(image).toHaveAttribute("alt", `Floor Layout CB ชั้น ${number}`);
+    await expect(image).toBeVisible();
+    const floorSrc = await image.getAttribute("src");
+    expect(digest(Buffer.from(floorSrc!.split(",")[1], "base64"))).toBe(digest(readFileSync(`src/assets/floor-layouts/CB-${number}.png`)));
+    await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  }
+  await page.getByRole("button", { name: "Back to Master Layout", exact: true }).click();
+  await expect(page.locator(".campus-hotspot")).toHaveCount(21);
+});
+
+
+}
+
+for (const floorNumber of [1, 2, 3, 4]) {
+test(`CSB floor ${floorNumber} embeds the exact supplied image and supports offline floor tools and return routes`, async ({ page }) => {
+  await openOffline(page);
+  await page.locator('[data-building="CSB"]').click();
+  await page.getByRole("tab", { name: `ชั้น ${floorNumber}`, exact: true }).click();
+  const image = page.locator(".plan-image img");
+  await expect(image).toHaveAttribute("alt", `Floor Layout CSB ชั้น ${floorNumber}`);
+  await expect(image).toBeVisible();
+  const src = await image.getAttribute("src");
+  expect(digest(Buffer.from(src!.split(",")[1], "base64"))).toBe(digest(readFileSync(`src/assets/floor-layouts/CSB-${floorNumber}.png`)));
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  for (const width of [1600, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect.poll(async () => {
+      const r = await image.boundingBox();
+      return r ? Math.abs(r.width / r.height - 1672 / (floorNumber === 2 ? 940 : 941)) : 1;
+    }).toBeLessThan(0.005);
+  }
+  for (const zoom of [150, 200]) {
+    for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "ขยาย", exact: true }).click();
+    await expect(page.locator(".plan-panel output")).toHaveText(`${zoom}%`);
+  }
+  const canvas = page.locator(".plan-canvas");
+  await canvas.scrollIntoViewIfNeeded();
+  const r = (await canvas.boundingBox())!;
+  await page.mouse.move(r.x + 25, r.y + 90);
+  await page.mouse.down();
+  await page.mouse.move(r.x + 65, r.y + 120, { steps: 4 });
+  await page.mouse.up();
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(40px,\s*30px\)/);
+  await page.getByRole("button", { name: "Reset view", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("100%");
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(0px,\s*0px\)/);
+  await page.getByRole("button", { name: "กลับไปหน้าอาคาร CSB", exact: true }).click();
+  await expect(page.locator(".floor-overview-card").nth(floorNumber - 1)).toContainText("มีภาพแปลนแล้ว");
+  await page.getByRole("button", { name: `เปิด Floor Layout CSB ชั้น ${floorNumber}`, exact: true }).click();
+  expect((await image.getAttribute("src")) === src).toBe(true);
+  for (const number of [1, 2, 3, 4, 3, 2, 1, 4]) {
+    await page.getByRole("tab", { name: `ชั้น ${number}`, exact: true }).click();
+    await expect(image).toHaveAttribute("alt", `Floor Layout CSB ชั้น ${number}`);
+    const selectedSrc = await image.getAttribute("src");
+    expect(digest(Buffer.from(selectedSrc!.split(",")[1], "base64"))).toBe(digest(readFileSync(`src/assets/floor-layouts/CSB-${number}.png`)));
+  }
+  await page.getByRole("button", { name: "Back to Master Layout", exact: true }).click();
+  await expect(page.locator(".campus-hotspot")).toHaveCount(21);
+});
+
+}
+
+
+test("PB floor 1 displays the supplied building-only image offline and preserves scope and return navigation", async ({ page }) => {
+  await openOffline(page);
+  await page.locator('[data-building="PB"]').click();
+  const image = page.locator(".plan-image img");
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 1");
+  await expect(image).toBeVisible();
+  const src = await image.getAttribute("src");
+  expect(digest(Buffer.from(src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-1-v2.png")));
+  await expect.poll(() => image.evaluate(i => [(i as HTMLImageElement).naturalWidth, (i as HTMLImageElement).naturalHeight])).toEqual([5263, 6144]);
+  await expect(page.locator(".scope-notice")).toContainText("ลานจอดรถ");
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  for (const width of [1600, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect.poll(async () => { const r = await image.boundingBox(); return r ? Math.abs(r.width / r.height - 5263 / 6144) : 1; }).toBeLessThan(0.005);
+  }
+  for (let n = 0; n < 10; n++) await page.getByRole("button", { name: "ขยาย", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("200%");
+  const canvas = page.locator(".plan-canvas"); await canvas.scrollIntoViewIfNeeded(); const r = (await canvas.boundingBox())!;
+  await page.mouse.move(r.x + 25, r.y + 90); await page.mouse.down(); await page.mouse.move(r.x + 65, r.y + 120, { steps: 4 }); await page.mouse.up();
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(40px,\s*30px\)/);
+  await page.getByRole("button", { name: "Reset view", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("100%");
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(0px,\s*0px\)/);
+  await page.getByRole("button", { name: "กลับไปหน้าอาคาร PB", exact: true }).click();
+  await expect(page.locator(".floor-overview-card").first()).toContainText("เฉพาะตัวอาคาร ไม่รวมลานจอดรถ");
+  await page.getByRole("button", { name: "เปิด Floor Layout PB ชั้น 1", exact: true }).click();
+  expect((await image.getAttribute("src")) === src).toBe(true);
+  await page.getByRole("tab", { name: "ชั้น 3", exact: true }).click();
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 3");
+  const pb3Src = await image.getAttribute("src");
+  expect(digest(Buffer.from(pb3Src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-3-v2.png")));
+  await page.getByRole("button", { name: "Back to Master Layout", exact: true }).click();
+  await expect(page.locator(".campus-hotspot")).toHaveCount(21);
+  await expect(page.locator(".stats-grid .stat").nth(3).locator("strong")).toHaveText(/11\s*\/ 11 ชั้น/);
+});
+
+test("PB floor 2 displays the supplied original image offline and preserves return navigation and pending metadata", async ({ page }) => {
+  await openOffline(page);
+  await page.locator('[data-building="PB"]').click();
+  await page.getByRole("tab", { name: "ชั้น 2", exact: true }).click();
+  const image = page.locator(".plan-image img");
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 2");
+  await expect(image).toBeVisible();
+  const src = await image.getAttribute("src");
+  expect(digest(Buffer.from(src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-2-v2.png")));
+  await expect.poll(() => image.evaluate(i => [(i as HTMLImageElement).naturalWidth, (i as HTMLImageElement).naturalHeight])).toEqual([6049, 6144]);
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  for (const width of [1600, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect.poll(async () => { const r = await image.boundingBox(); return r ? Math.abs(r.width / r.height - 6049 / 6144) : 1; }).toBeLessThan(0.005);
+  }
+  for (let n = 0; n < 10; n++) await page.getByRole("button", { name: "ขยาย", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("200%");
+  const canvas = page.locator(".plan-canvas"); await canvas.scrollIntoViewIfNeeded(); const r = (await canvas.boundingBox())!;
+  await page.mouse.move(r.x + 25, r.y + 90); await page.mouse.down(); await page.mouse.move(r.x + 65, r.y + 120, { steps: 4 }); await page.mouse.up();
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(40px,\s*30px\)/);
+  await page.getByRole("button", { name: "Reset view", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("100%");
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(0px,\s*0px\)/);
+  await page.getByRole("button", { name: "กลับไปหน้าอาคาร PB", exact: true }).click();
+  await expect(page.locator(".floor-overview-card").nth(1)).toContainText("ข้อมูล Layout ยังรอการยืนยัน");
+  await page.getByRole("button", { name: "เปิด Floor Layout PB ชั้น 2", exact: true }).click();
+  expect((await image.getAttribute("src")) === src).toBe(true);
+  await page.getByRole("tab", { name: "ชั้น 1", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 1");
+  const pb1Src = await image.getAttribute("src");
+  expect(digest(Buffer.from(pb1Src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-1-v2.png")));
+  await page.getByRole("tab", { name: "ชั้น 2", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  expect((await image.getAttribute("src")) === src).toBe(true);
+  await page.getByRole("tab", { name: "ชั้น 3", exact: true }).click();
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 3");
+  const pb3Src = await image.getAttribute("src");
+  expect(digest(Buffer.from(pb3Src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-3-v2.png")));
+  await page.getByRole("button", { name: "Back to Master Layout", exact: true }).click();
+  await expect(page.locator(".campus-hotspot")).toHaveCount(21);
+  await expect(page.locator(".stats-grid .stat").nth(3).locator("strong")).toHaveText(/11\s*\/ 11 ชั้น/);
+});
+
+test("PB floor 3 displays the supplied original image offline and preserves return navigation and pending metadata", async ({ page }) => {
+  await openOffline(page);
+  await page.locator('[data-building="PB"]').click();
+  await page.getByRole("tab", { name: "ชั้น 3", exact: true }).click();
+  const image = page.locator(".plan-image img");
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 3");
+  await expect(image).toBeVisible();
+  const src = await image.getAttribute("src");
+  expect(digest(Buffer.from(src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-3-v2.png")));
+  await expect.poll(() => image.evaluate(i => [(i as HTMLImageElement).naturalWidth, (i as HTMLImageElement).naturalHeight])).toEqual([6098, 6144]);
+  await expect(page.locator(".area-hotspot")).toHaveCount(0);
+  for (const width of [1600, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect.poll(async () => { const r = await image.boundingBox(); return r ? Math.abs(r.width / r.height - 6098 / 6144) : 1; }).toBeLessThan(0.005);
+  }
+  for (let n = 0; n < 10; n++) await page.getByRole("button", { name: "ขยาย", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("200%");
+  const canvas = page.locator(".plan-canvas"); await canvas.scrollIntoViewIfNeeded(); const r = (await canvas.boundingBox())!;
+  await page.mouse.move(r.x + 25, r.y + 90); await page.mouse.down(); await page.mouse.move(r.x + 65, r.y + 120, { steps: 4 }); await page.mouse.up();
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(40px,\s*30px\)/);
+  await page.getByRole("button", { name: "Reset view", exact: true }).click();
+  await expect(page.locator(".plan-panel output")).toHaveText("100%");
+  await expect(page.locator(".plan-image")).toHaveAttribute("style", /translate\(0px,\s*0px\)/);
+  await page.getByRole("button", { name: "กลับไปหน้าอาคาร PB", exact: true }).click();
+  await expect(page.locator(".floor-overview-card").nth(2)).toContainText("ข้อมูล Layout ยังรอการยืนยัน");
+  await page.getByRole("button", { name: "เปิด Floor Layout PB ชั้น 3", exact: true }).click();
+  expect((await image.getAttribute("src")) === src).toBe(true);
+  await page.getByRole("tab", { name: "ชั้น 1", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 1");
+  const pb1Src = await image.getAttribute("src");
+  expect(digest(Buffer.from(pb1Src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-1-v2.png")));
+  await page.getByRole("tab", { name: "ชั้น 2", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 2");
+  await page.getByRole("tab", { name: "ชั้น 3", exact: true }).click();
+  await expect(image).toHaveAttribute("alt", "Floor Layout PB ชั้น 3");
+  const pb3Src = await image.getAttribute("src");
+  expect(digest(Buffer.from(pb3Src!.split(",")[1], "base64"))).toBe(digest(readFileSync("src/assets/floor-layout-revisions/PB-3-v2.png")));
+  await page.getByRole("button", { name: "Back to Master Layout", exact: true }).click();
+  await expect(page.locator(".campus-hotspot")).toHaveCount(21);
+  await expect(page.locator(".stats-grid .stat").nth(3).locator("strong")).toHaveText(/11\s*\/ 11 ชั้น/);
 });

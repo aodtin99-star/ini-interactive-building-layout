@@ -3,6 +3,7 @@ import {
   floorAssetKey,
   bundledFloorImages,
   expectedFloorImageName,
+  activeFloorRevisions,
 } from "./floorImages";
 import { buildings } from "./buildings";
 describe("real floor image readiness", () => {
@@ -35,8 +36,18 @@ describe("real floor image readiness", () => {
     expect(expectedFloorImageName("FLB", 1)).toBeUndefined();
   });
   it("does not invent any image or modify verified floor metadata", () => {
-    expect(Object.keys(bundledFloorImages)).toEqual(["CB-1"]);
+    expect(Object.keys(bundledFloorImages)).toEqual(["CB-1", "CB-2", "CB-3", "CB-4", "CSB-1", "CSB-2", "CSB-3", "CSB-4", "PB-1", "PB-2", "PB-3"]);
     expect(bundledFloorImages["CB-1"]).toBeTruthy();
+    expect(bundledFloorImages["CB-2"]).toBeTruthy();
+    expect(bundledFloorImages["CB-3"]).toBeTruthy();
+    expect(bundledFloorImages["CB-4"]).toBeTruthy();
+    expect(bundledFloorImages["CSB-1"]).toBeTruthy();
+    expect(bundledFloorImages["CSB-2"]).toBeTruthy();
+    expect(bundledFloorImages["CSB-3"]).toBeTruthy();
+    expect(bundledFloorImages["CSB-4"]).toBeTruthy();
+    expect(bundledFloorImages["PB-1"]).toBeTruthy();
+    expect(bundledFloorImages["PB-2"]).toBeTruthy();
+    expect(bundledFloorImages["PB-3"]).toBeTruthy();
     for (const building of buildings)
       for (const floor of building.floors) {
         expect(floor.image).toBeUndefined();
@@ -45,5 +56,15 @@ describe("real floor image readiness", () => {
     expect(
       buildings.find((b) => b.id === "PB")!.floors.map((f) => f.status),
     ).toEqual(["confirmed", "pending", "pending"]);
+  });
+});
+
+
+describe("floor revision selection", () => {
+  it("replaces only PB floors 1 through 3 while retaining original floor metadata", () => {
+    expect(activeFloorRevisions).toEqual({ "PB-1": "/src/assets/floor-layout-revisions/PB-1-v2.png", "PB-2": "/src/assets/floor-layout-revisions/PB-2-v2.png", "PB-3": "/src/assets/floor-layout-revisions/PB-3-v2.png" });
+    expect(bundledFloorImages["PB-1"]).toContain("PB-1-v2.png");
+    expect(bundledFloorImages["PB-2"]).toContain("PB-2-v2.png");
+    expect(buildings.find(b => b.id === "PB")!.floors.map(f => f.status)).toEqual(["confirmed", "pending", "pending"]);
   });
 });

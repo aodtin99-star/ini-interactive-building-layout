@@ -23,7 +23,10 @@ export function floorAssetKey(path: string): string | undefined {
     : undefined;
 }
 const assets = import.meta.glob<string>(
-  "/src/assets/floor-layouts/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}",
+  [
+    "/src/assets/floor-layouts/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}",
+    "!/src/assets/floor-layouts/*-v2.png",
+  ],
   {
     eager: true,
     query: "?url",
@@ -37,4 +40,20 @@ for (const [path, image] of Object.entries(assets)) {
   if (bundledFloorImages[key])
     throw new Error(`Duplicate floor image for ${key}`);
   bundledFloorImages[key] = image;
+}
+
+// Explicit revision selection: originals remain available and are never overwritten.
+const revisionAssets = import.meta.glob<string>(
+  "/src/assets/floor-layout-revisions/*.png",
+  { eager: true, query: "?url", import: "default" },
+);
+export const activeFloorRevisions: Record<string, string> = {
+  "PB-1": "/src/assets/floor-layout-revisions/PB-1-v2.png",
+  "PB-2": "/src/assets/floor-layout-revisions/PB-2-v2.png",
+  "PB-3": "/src/assets/floor-layout-revisions/PB-3-v2.png",
+};
+for (const [key, path] of Object.entries(activeFloorRevisions)) {
+  if (!bundledFloorImages[key] || !revisionAssets[path])
+    throw new Error(`Missing original or selected floor revision: ${key}`);
+  bundledFloorImages[key] = revisionAssets[path];
 }

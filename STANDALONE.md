@@ -65,3 +65,60 @@ node scripts/build-standalone.mjs
 ## อัปเดตภาพจริง CB ชั้น 1 (ตรวจรับแล้ว)
 
 Standalone ใน Workspace ล่าสุดฝัง `src/assets/floor-layouts/CB-1.png` แล้ว เปิด CB ชั้น 1 จะเห็นภาพจริงแทน Placeholder รายงานล่าสุด: [CB-1-INTEGRATION-QA.md](CB-1-INTEGRATION-QA.md) ผู้ใช้อนุมัติให้ Commit/Push งาน CB ชั้น 1 แล้ว ไม่มีการ Merge เข้า main และยังไม่ได้ทดสอบเครื่อง Windows ของบริษัทโดยตรง
+
+## อัปเดตภาพจริง CB ชั้น 2 (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝัง `CB-1.png` และ `CB-2.png` แล้ว รองรับการเลือก CB ชั้น 1–2 พร้อมภาพจริง ส่วนชั้นที่ยังไม่มีภาพคง Placeholder รายงานล่าสุด: [CB-2-INTEGRATION-QA.md](CB-2-INTEGRATION-QA.md) งาน CB ชั้น 2 รอบนี้ยังไม่ Commit/Push/Merge
+
+## อัปเดตภาพจริง CB ชั้น 3 (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝังภาพจริง CB ชั้น 1–3 แล้ว รายงานล่าสุด: [CB-3-INTEGRATION-QA.md](CB-3-INTEGRATION-QA.md) พบ CB-4 บน GitHub แต่ยังไม่รวมในงานรอบนี้ ไม่มีการ Commit/Push/Merge งาน CB ชั้น 2–3 ที่ยังรอตรวจรับ
+
+## อัปเดต CB ครบ 4 ชั้น (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝังภาพจริง CB ชั้น 1–4 ครบแล้ว รายงานปัจจุบัน: [CB-4-INTEGRATION-QA.md](CB-4-INTEGRATION-QA.md) งานรวม CB ชั้น 2–4 รอบนี้ยังไม่ Commit/Push/Merge
+
+## Phase 3: CSB ชั้น 1 (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝัง CB ชั้น 1–4 และ CSB ชั้น 1 แล้ว CSB ชั้น 2–4 มีไฟล์บน GitHub แต่ยังไม่เชื่อมในรอบนี้ รายงานล่าสุด: [CSB-1-INTEGRATION-QA.md](CSB-1-INTEGRATION-QA.md) ไม่มี Commit/Push/Merge และหยุดรอตรวจรับก่อนดำเนินการ CSB ชั้น 2
+
+## Phase 3: CSB ชั้น 2 (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝัง CB ชั้น 1–4 และ CSB ชั้น 1–2 แล้ว รายงานล่าสุด: [CSB-2-INTEGRATION-QA.md](CSB-2-INTEGRATION-QA.md) ยังไม่เชื่อม CSB ชั้น 3–4 และไม่มี Commit/Push/Merge หยุดรอตรวจรับก่อนดำเนินการชั้น 3
+
+## Phase 4: CSB ชั้น 3 (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝัง CB ชั้น 1–4 และ CSB ชั้น 1–3 แล้ว รายงานล่าสุด: [CSB-3-INTEGRATION-QA.md](CSB-3-INTEGRATION-QA.md) ยังไม่เชื่อม CSB ชั้น 4 และไม่มี Commit/Push/Merge หยุดรอตรวจรับก่อนดำเนินการชั้น 4
+
+## Phase 5: CSB ชั้น 4 (รอตรวจรับ)
+
+Standalone ใน Workspace ล่าสุดฝัง CB ชั้น 1–4 และ CSB ชั้น 1–4 ครบ 8 ภาพ ตัวนับภาพจริงเริ่มต้น 8/11 รายงานล่าสุด: [CSB-4-INTEGRATION-QA.md](CSB-4-INTEGRATION-QA.md) ยังไม่ Commit/Push/Merge และหยุดรอตรวจรับก่อนเริ่ม PB ชั้น 1
+
+## Phase 6: PB ชั้น 1 (รอตรวจรับ)
+
+Standalone ล่าสุดฝัง CB/CSB ครบ 8 ชั้นและ PB ชั้น 1 รวมภาพพร้อมแสดง 9/11 รายงานล่าสุดและข้อสังเกตเรื่องขอบเขตตัวอาคาร: [PB-1-INTEGRATION-QA.md](PB-1-INTEGRATION-QA.md) ยังไม่เชื่อม PB ชั้น 2–3 และไม่ Commit/Push/Merge
+
+## Phase 7: PB ชั้น 2 (รอตรวจรับขอบเขต)
+
+Standalone ล่าสุดฝัง PB ชั้น 2 จากต้นฉบับโดยไม่ Crop เพราะขอบเขตลานจอดรถไม่ระบุชัดเจน ตัวนับภาพพร้อมแสดง 10/11 ซึ่งไม่ใช่การยืนยัน Layout รายงานล่าสุด: [PB-2-INTEGRATION-QA.md](PB-2-INTEGRATION-QA.md) รอตรวจรับขอบเขตตัวอาคารก่อนบันทึก ไม่มี Commit/Push/Merge และยังไม่เริ่ม PB ชั้น 3
+
+## PB Layout Revision: ชั้น 1 v2 (รอตรวจรับ)
+
+Standalone ล่าสุดเลือก PB-1-v2 และรักษา PB ชั้น 2 เดิม ตัวนับยังเป็น 10/11 ภาพเดิมและ Backup อยู่ใน Source ไม่ถูกลบ HTML ประมาณ 44.9 MB เพราะฝังภาพแนวตั้ง 5263 × 6144 ที่ความละเอียดเต็ม รายงาน Before/After: [PB-LAYOUT-REVISION-QA.md](PB-LAYOUT-REVISION-QA.md) ยังไม่เริ่ม Revision ชั้น 2–3 และไม่มี Commit/Push/Merge
+
+## PB ชั้น 2 v2 (รอตรวจรับ)
+
+Standalone ล่าสุดเลือก PB-1-v2 และ PB-2-v2 พร้อม CB/CSB ทั้ง 8 ชั้น ตัวนับคง 10/11 ไฟล์ประมาณ 67.1 MB เพื่อรักษาความละเอียดเต็ม รายงาน Before/After และข้อจำกัด Windows: [PB-2-V2-INTEGRATION-QA.md](PB-2-V2-INTEGRATION-QA.md) ไม่ Commit/Push/Merge และยังไม่เริ่ม PB ชั้น 3
+
+
+## Owner Confirmation: PB ชั้น 2 v2
+
+ขอบเขตภาพ PB ชั้น 2 v2 เป็น **Owner Approved** ตามคำยืนยันเจ้าของแบบวันที่ 14 ตุลาคม 2026 การตัด METAL SHEET ด้านซ้ายและพื้นที่ส่วนเกินขอบบน/ขอบขวาเป็นไปโดยตั้งใจ ไม่ใช่ข้อมูลสูญหาย คงภาพและ Standalone เดิมทุก byte ผล Interactive 6/6 เดิมคงไว้ ข้อสังเกตขอบเขตรอตรวจรับในรายงานย้อนหลังถูกปิดโดยคำยืนยันนี้ ดู [Final Acceptance ล่าสุด](PB-2-FINAL-ACCEPTANCE.md) Windows บริษัท **ยังไม่ได้ทดสอบ** ยังไม่เริ่ม PB ชั้น 3 และไม่ Commit/Push/Merge
+
+## PB ชั้น 3 v2 (รอตรวจรับ)
+
+Standalone ล่าสุดฝัง CB/CSB ทั้ง 8 ชั้นและ PB v2 ครบ 3 ชั้น ตัวนับภาพพร้อมแสดง 11/11 ไฟล์ประมาณ 90.5 MB เพื่อรักษาความละเอียดต้นฉบับ รายงานล่าสุด: [PB-3-V2-INTEGRATION-QA.md](PB-3-V2-INTEGRATION-QA.md) Owner Approved PB ชั้น 2 คงเดิม; PB ชั้น 3 รอตรวจรับแยก ไม่มี Commit/Push/Merge
+
+## การส่งเวอร์ชันตรวจรับผ่าน GitHub
+
+ผู้ใช้อนุมัติให้ Commit/Push เวอร์ชันตรวจรับไปยัง feature/ini-building-layout เพื่อดาวน์โหลดจาก Windows แล้ว ขอบเขต PB ชั้น 3 ยังคงรอเจ้าของแบบตรวจรับ ไม่ Merge เข้า main วิธีดาวน์โหลด ZIP/HTML: [DOWNLOAD-WINDOWS.md](DOWNLOAD-WINDOWS.md) ข้อความห้าม Commit/Push ในรายงานรอบก่อนเป็นสถานะก่อนคำอนุมัติ ไม่ใช่สถานะการส่งเวอร์ชันนี้
